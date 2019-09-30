@@ -1,3 +1,6 @@
+import imutils
+from imutils.video import VideoStream
+import argparse
 import numpy as np
 import cv2
 import serial
@@ -53,6 +56,16 @@ base_image_filename = filename + ".jpg"
 out = cv2.VideoWriter(out_filename, fourcc, 20.0, (640,480))
 # save the base image
 cv2.imwrite(base_image_filename, base_image)
+
+
+# set boundary boxes for movement tracking
+cam_width = 640
+cam_height = 480
+# top left of image: [x = 0, y = 0]
+# bottom right of image: [x = 640, y = 480]
+boundary_box_1 = [0,0,210,480]
+boundary_box_2 = [211,0,420,480]
+boundary_box_3 = [421,0,640,480]
 
 
 while(True):
