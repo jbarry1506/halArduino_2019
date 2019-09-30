@@ -1,0 +1,23 @@
+helpful for accessing an ip camera
+stackoverflow.com/questions/49978705/access-ip-camera-in-python-opencv
+
+full_fov = entire camera frame
+boundary_box_1 = from left side fov to first sidewalk block
+boundary_box_2 = from left side field of vision to second sidewalk block
+boundary_box_3 = from second sidewalk block to door
+motion_box = movement detected in boundary_box_1 > x% of fov - follow movement
+follow_box = boundary box around person being followed 
+start_recording = start the camera recording
+
+if motion_box triggered
+    start_recording
+    turn on eyes
+    draw follow_box
+    if boundary_box_2
+        turn eyes and head to left boundary_box_2
+        follow movement with eyes to boundary_box_3
+        follow with head to boundary_box_3
+        center eyes
+        if boundary_box_3
+            follow movement with head to door
+
