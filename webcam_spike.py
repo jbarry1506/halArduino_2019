@@ -58,27 +58,69 @@ out = cv2.VideoWriter(out_filename, fourcc, 20.0, (640,480))
 cv2.imwrite(base_image_filename, base_image)
 
 
+#----------------------------------------------------------------------
 # set boundary boxes for movement tracking
 cam_width = 640
 cam_height = 480
 # top left of image: [x = 0, y = 0]
 # bottom right of image: [x = 640, y = 480]
-boundary_box_1 = [0,0,210,480]
-boundary_box_2 = [211,0,420,480]
-boundary_box_3 = [421,0,640,480]
+boundary_box_1_begin = (0,0)
+boundary_box_1_end = (207,480)  # allow for 3 pixel border on each side
+boundary_box_1_color = (255,0,0)
 
+boundary_box_2 = [211,0,420,480]
+boundary_box_2_begin = (211,0)
+boundary_box_2_end = (417,480)  # allow for 3 pixel border on each side
+boundary_box_2_color = (0,255,0)
+
+boundary_box_3 = [421,0,640,480]
+boundary_box_3_begin = (421,0)
+boundary_box_3_end = (637,480)  # allow for 3 pixel border on each side
+boundary_box_3_color = (0,0,255)
+
+# draw the boundary boxes on the base image
+img = cv2.imread(base_image_filename, cv2.IMREAD_COLOR)
+cv2.rectangle(img, boundary_box_1_begin, boundary_box_1_end, \
+    boundary_box_1_color, 3)
+cv2.rectangle(img, boundary_box_2_begin, boundary_box_2_end, \
+    boundary_box_2_color, 3)
+cv2.rectangle(img, boundary_box_3_begin, boundary_box_3_end, \
+    boundary_box_3_color, 3)
+
+# cv2.imshow('base_image', img)
+
+#----------------------------------------------------------------------
+# Capture frame-by-frame
+ret, frame1 = cap.read() # can i do this just comparing base image?
+ret, frame2 = cap.read()
 
 while(True):
-    # Capture frame-by-frame
-    ret, frame = cap.read()
+    diff = cv2.absdiff(frame1, frame2)
+    gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(gray, (5,5), 0)
+    _, thresh = cv2.threshold(blur, 20, 255, cv2.THRESH_BINARY)
+    dilated = cv2.dilate(thresh, None, iterations=3)
+    contours, _ = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    out.write(frame)
+    # cv2.drawContours(frame1, contours, -1, (0,255,0), 2)
+    for contour in contours:
+        (x, y, w, h) = cv2.boundingRect(contour)
+
+        if cv2.contourArea(contour) < 3000:
+            continue
+
+        cv2.rectangle(frame1, (x, y), (x+w, x+h), (0,255,0), 2)
 
     # Our operations on the frame come here
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    # Display the resulting frame
-    cv2.imshow('frame',gray)
+    # Display the resulting frames
+    # cv2.imshow('frame1',gray)
+    cv2.imshow('frame1_feed', frame1)
+    frame1 = frame2
+    ret, frame2 = cap.read()
+
+    out.write(frame1)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
