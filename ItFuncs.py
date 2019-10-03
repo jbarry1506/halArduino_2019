@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+import datetime
 
 def construct_file():
     dt = datetime.datetime.now()

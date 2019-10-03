@@ -1,3 +1,6 @@
 halarduino_2019.code-workspace
 .vscode
 output.avi
+__pycache__
+arduino_shutdown_spike.py
+arduino_wakeup_spike.py

@@ -28,12 +28,18 @@ out = cv2.VideoWriter(out_filename, fourcc, 20.0, (640,480))
 cv2.imwrite(base_image_filename, base_image)
 
 
+def clock_diff(cl_end, cl_begin):
+    cl_diff = cl_end - cl_begin
+    return cl_diff
+
+
 #----------------------------------------------------------------------
 # set boundary boxes for movement tracking
 cam_width = 640
 cam_height = 480
 # top left of image: [x = 0, y = 0]
 # bottom right of image: [x = 640, y = 480]
+boundary_box_1 = [0,0,204,480]
 boundary_box_1_begin = (0,0)
 boundary_box_1_end = (207,480)  # allow for 3 pixel border on each side
 boundary_box_1_color = (255,0,0)
@@ -64,6 +70,10 @@ cv2.rectangle(img, boundary_box_3_begin, boundary_box_3_end, \
 ret, frame1 = cap.read() # can i do this just comparing base image?
 ret, frame2 = cap.read()
 
+bb1_active = False
+bb2_active = False
+bb3_active = False
+
 while(True):
     diff = cv2.absdiff(frame1, frame2)
     gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
@@ -74,6 +84,7 @@ while(True):
 
     # cv2.drawContours(frame1, contours, -1, (0,255,0), 2)
     for contour in contours:
+        current_clock = time.clock()
         (x, y, w, h) = cv2.boundingRect(contour)
 
         if cv2.contourArea(contour) < 3000:
@@ -81,11 +92,49 @@ while(True):
 
         cv2.rectangle(frame1, (x, y), (x+w, x+h), (0,255,0), 2)
 
+        if boundary_box_1[0] < x < boundary_box_2[0]:
+            if bb1_active == True:
+                clock_difference = clock_diff(current_clock, start_clock_1)
+                if clock_difference > 1:
+                    print(clock_difference)
+            else:
+                print("Activate region 1")
+                start_clock_1 = time.clock()
+                bb1_active = True
+                bb2_active = False
+                bb3_active = False
+        elif boundary_box_2[0] < x < boundary_box_3[0]:
+            if bb2_active == True:
+                clock_difference = clock_diff(current_clock, start_clock_2)
+                if clock_difference > 1:
+                    print(clock_difference)
+            else:
+                print("Activate region 2")
+                start_clock_2 = time.clock()
+                bb1_active = False
+                bb2_active = True
+                bb3_active = False
+        elif boundary_box_3[0] < x < boundary_box_3[2]:
+            if bb3_active == True:
+                clock_difference = clock_diff(current_clock, start_clock_3)
+                if clock_difference > 1:
+                    print(clock_difference)
+            else:
+                print("Activate region 3")
+                start_clock_3 = time.clock()
+                bb1_active = False
+                bb2_active = False
+                bb3_active = True
+        else:
+            pass
+
+
+
     # Our operations on the frame come here
     # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # Display the resulting frames
-    # cv2.imshow('frame1',gray)
+    cv2.imshow('frame1',gray)
     cv2.imshow('frame1_feed', frame1)
     frame1 = frame2
     ret, frame2 = cap.read()
