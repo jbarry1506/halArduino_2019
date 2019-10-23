@@ -11,7 +11,7 @@ int incomingByte;      // a variable to read incoming serial data into
 void setup()
 {
     Serial.begin(9600);
-    pinMode(4, OUTPUT);
+    pinMode(9, OUTPUT);
 }
 
 void loop() {
@@ -21,11 +21,11 @@ void loop() {
     incomingByte = Serial.read();
     // if it's a capital H (ASCII 72), turn on the LED:
     if (incomingByte == 'H') {
-      digitalWrite(4, HIGH);
+      digitalWrite(9, HIGH);
     }
     // if it's an L (ASCII 76) turn off the LED:
     if (incomingByte == 'L') {
-      digitalWrite(4, LOW);
+      digitalWrite(9, LOW);
     }
   }
 }

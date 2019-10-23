@@ -1,3 +1,8 @@
+# currently working tutorials
+# https://buildmedia.readthedocs.org/media/pdf/opencv-python-tutroals/latest/opencv-python-tutroals.pdf
+# https://www.nongnu.org/avr-libc/user-manual/group__avr__sleep.html
+# https://makezine.com/2014/04/23/arduinos-servo-library-angles-microseconds-and-optional-command-parameters/
+
 import imutils
 from imutils.video import VideoStream
 import argparse
@@ -27,11 +32,9 @@ out = cv2.VideoWriter(out_filename, fourcc, 20.0, (640,480))
 # save the base image
 cv2.imwrite(base_image_filename, base_image)
 
-
 def clock_diff(cl_end, cl_begin):
     cl_diff = cl_end - cl_begin
     return cl_diff
-
 
 #----------------------------------------------------------------------
 # set boundary boxes for movement tracking
@@ -73,6 +76,7 @@ ret, frame2 = cap.read()
 bb1_active = False
 bb2_active = False
 bb3_active = False
+end_clock_difference = 0
 
 while(True):
     diff = cv2.absdiff(frame1, frame2)
@@ -92,46 +96,49 @@ while(True):
 
         cv2.rectangle(frame1, (x, y), (x+w, x+h), (0,255,0), 2)
 
-        if boundary_box_1[0] < x < boundary_box_2[0]:
-            if bb1_active == True:
-                clock_difference = clock_diff(current_clock, start_clock_1)
-                if clock_difference > 1:
-                    print(clock_difference)
+        if boundary_box_1[0] < x < boundary_box_3[2]:
+            if boundary_box_1[0] < x < boundary_box_2[0]:
+                if bb1_active == True:
+                    clock_difference = clock_diff(current_clock, start_clock_1)
+                    if clock_difference > 1:
+                        print(clock_difference)
+                else:
+                    print("Activate region 1")
+                    start_clock_1 = time.clock()
+                    bb1_active = True
+                    bb2_active = False
+                    bb3_active = False
+            elif boundary_box_2[0] < x < boundary_box_3[0]:
+                if bb2_active == True:
+                    clock_difference = clock_diff(current_clock, start_clock_2)
+                    if clock_difference > 1:
+                        print(clock_difference)
+                else:
+                    print("Activate region 2")
+                    start_clock_2 = time.clock()
+                    bb1_active = False
+                    bb2_active = True
+                    bb3_active = False
+            elif boundary_box_3[0] < x < boundary_box_3[2]:
+                if bb3_active == True:
+                    clock_difference = clock_diff(current_clock, start_clock_3)
+                    if clock_difference > 1:
+                        print(clock_difference)
+                else:
+                    print("Activate region 3")
+                    start_clock_3 = time.clock()
+                    bb1_active = False
+                    bb2_active = False
+                    bb3_active = True
             else:
-                print("Activate region 1")
-                start_clock_1 = time.clock()
-                bb1_active = True
-                bb2_active = False
-                bb3_active = False
-        elif boundary_box_2[0] < x < boundary_box_3[0]:
-            if bb2_active == True:
-                clock_difference = clock_diff(current_clock, start_clock_2)
-                if clock_difference > 1:
-                    print(clock_difference)
-            else:
-                print("Activate region 2")
-                start_clock_2 = time.clock()
-                bb1_active = False
-                bb2_active = True
-                bb3_active = False
-        elif boundary_box_3[0] < x < boundary_box_3[2]:
-            if bb3_active == True:
-                clock_difference = clock_diff(current_clock, start_clock_3)
-                if clock_difference > 1:
-                    print(clock_difference)
-            else:
-                print("Activate region 3")
-                start_clock_3 = time.clock()
-                bb1_active = False
-                bb2_active = False
-                bb3_active = True
+                pass
         else:
-            pass
-
-
-
-    # Our operations on the frame come here
-    # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            end_clock = time.clock()
+            end_clock_difference = clock_diff(end_clock, current_clock)
+            
+    if end_clock_difference > 15:
+        # put the arduino to sleep
+        print("Putting the arduino to sleep.")
 
     # Display the resulting frames
     cv2.imshow('frame1',gray)
