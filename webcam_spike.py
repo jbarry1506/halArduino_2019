@@ -43,6 +43,14 @@ def find_center(lb, rb):
     return center
 
 
+def head_angle(cp):
+    if cp > 0:
+        angle = cp/4
+    else:
+        angle = 0
+    angle = int(angle)
+    return angle
+
 
 #----------------------------------------------------------------------
 # set boundary boxes for movement tracking
@@ -112,7 +120,9 @@ while(True):
         center_point = find_center(left_bound,right_bound)
         print("center_point = ",center_point)
 
-
+        # find the angle the head should be pointed to
+        head_point = head_angle(center_point)
+        print("head_point = ",head_point)
 
 
 
