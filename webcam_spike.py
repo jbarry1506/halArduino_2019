@@ -18,7 +18,7 @@ from ItFuncs import *
 # ser = serial.Serial('COM3', 9600)
 
 # camera 1 is the external camera
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 # capture the base image for comparison
 base_image = get_base_image(cap)
 # set up the video codec
@@ -35,6 +35,14 @@ cv2.imwrite(base_image_filename, base_image)
 def clock_diff(cl_end, cl_begin):
     cl_diff = cl_end - cl_begin
     return cl_diff
+
+
+def find_center(lb, rb):
+    center = rb - ((rb - lb)/2)
+    center = int(center)
+    return center
+
+
 
 #----------------------------------------------------------------------
 # set boundary boxes for movement tracking
@@ -91,10 +99,22 @@ while(True):
         current_clock = time.clock()
         (x, y, w, h) = cv2.boundingRect(contour)
 
-        if cv2.contourArea(contour) < 3000:
+        if cv2.contourArea(contour) < 15000:
             continue
 
-        cv2.rectangle(frame1, (x, y), (x+w, x+h), (0,255,0), 2)
+        left_bound = x
+        right_bound = x+w
+        cv2.rectangle(frame1, (x, y), (x+w, y+h), (0,255,0), 2)
+        # print testing for boundaries
+        print("left_bound = ",left_bound,"\t right_bound = ",right_bound)
+
+        # find the center of the object detected        
+        center_point = find_center(left_bound,right_bound)
+        print("center_point = ",center_point)
+
+
+
+
 
         if boundary_box_1[0] < x < boundary_box_3[2]:
             if boundary_box_1[0] < x < boundary_box_2[0]:
