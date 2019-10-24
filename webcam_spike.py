@@ -16,7 +16,10 @@ import os
 from ItFuncs import *
 
 # set up the serial port to receive data
-ser = serial.Serial('COM3', 115200)
+    # com3 is test arduino - duemillanove
+# ser = serial.Serial('COM3', 115200)
+    # com4 is production arduino - UNO
+ser = serial.Serial('COM4', 115200)
 
 # camera 1 is the external camera
 cap = cv2.VideoCapture(0)
@@ -49,8 +52,14 @@ def head_angle(cp):
         angle = cp/3.55
     else:
         angle = 0
-    angle = int(angle)
+    # add 210 for the frequency of the servo
+    angle = int(angle)+210
     return angle
+
+
+def arduino_head_angle(ha):
+    aha = ha + 210
+    return aha
 
 
 #----------------------------------------------------------------------
@@ -132,12 +141,7 @@ while(True):
         print("CAP_PROP_POS_FRAMES = ",current_frame)
 
         time_diff = int(clock_diff(current_clock,start_clock))
-        twofer = time_diff%2
-        print("time_diff = ",time_diff)
-        # if twofer != 0:
-        #     continue
-        # else:
-            # write the head_point out to the buffer one byte at a time
+
         for i in str(head_point):
             ser.write(b'{%d}'%int(i))
             time.sleep(0.025)
