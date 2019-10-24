@@ -57,8 +57,18 @@ def head_angle(cp):
     return angle
 
 
+# function to reverse head angle for correct rotation of servo
 def arduino_head_angle(ha):
-    aha = ha + 210
+    # 300 is approximate middle
+    print("ha = ",ha)
+    print("the type of ha is ",type(ha))
+    if ha > 300:
+        aha = ha - ((ha-300)*2)
+    elif ha < 300:
+        aha = ha + ((300-ha)*2)
+    else:
+        # head angle = 300
+        aha = ha
     return aha
 
 
@@ -136,13 +146,17 @@ while(True):
         print("head_point = ",head_point)
 
 
-        # get the current frame number
-        current_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
-        print("CAP_PROP_POS_FRAMES = ",current_frame)
+        # recalculate for the arduino head point
+        arduino_head_point = arduino_head_angle(head_point)
+        print("arduino_head_point = ",arduino_head_point)
 
-        time_diff = int(clock_diff(current_clock,start_clock))
 
-        for i in str(head_point):
+        # get the current frame number - this code is not being used - reference
+        # current_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
+        # print("CAP_PROP_POS_FRAMES = ",current_frame)
+        # time_diff = int(clock_diff(current_clock,start_clock))
+
+        for i in str(arduino_head_point):
             ser.write(b'{%d}'%int(i))
             time.sleep(0.025)
         ser.write(b's')
