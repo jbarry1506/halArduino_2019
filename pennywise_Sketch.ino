@@ -21,16 +21,19 @@ int RIGHT = 1; //I2C RIGHT EYE SERVO
 char incomingByte; // variable to read incoming serial data
 int pos = 0; // variable to store the servo position
     
-    // CENTER = ~320
-    // LEFT = 250
-    // RIGHT = 400
+    // EYES CENTER = ~320
+    // EYES LEFT = 250
+    // EYES RIGHT = 400
 
+    // 180 degrees for head
 #define HEAD_SERVO_MIN 210
 #define HEAD_SERVO_MAX 390
-#define LEFT_EYE_SERVO_MIN 210
-#define RIGHT_EYE_SERVO_MIN 210 
-#define LEFT_EYE_SERVO_MAX 390
-#define RIGHT_EYE_SERVO_MAX 390 
+
+    // 90 degrees for eyes
+#define LEFT_EYE_SERVO_MIN 260
+#define LEFT_EYE_SERVO_MAX 340
+#define RIGHT_EYE_SERVO_MIN 260
+#define RIGHT_EYE_SERVO_MAX 340 
 
 
 void setup() {
@@ -57,5 +60,12 @@ void loop() {
       pwm.setPWM(0, 0, pos);
       pos = 0;  
     }
+    else if(incomingByte == 'e'){
+      // Serial.println(pos);
+      // move eyes
+      pwm.setPWM(15, 0, pos);
+      pwm.setPWM(1, 0, pos);      
+      pos = 0;  
+    }    
   }
 }

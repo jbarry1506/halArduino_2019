@@ -57,10 +57,18 @@ def head_angle(cp):
     return angle
 
 
+def eye_angle(cp):
+    if cp > 0:
+        e_angle = cp/7
+    else:
+        e_angle = 0
+    e_angle = int(e_angle)+260
+    return e_angle
+
+
 # function to reverse head angle for correct rotation of servo
 def arduino_head_angle(ha, paha):
     # 300 is approximate middle
-
     if ha > 300:
         aha = ha - ((ha-300)*2)
     elif ha < 300:
@@ -85,6 +93,17 @@ def arduino_head_angle(ha, paha):
             aha = paha -5
 
     return aha
+
+
+# function to send serial data
+def send_serial(data, part):
+    for i in str(data):
+        ser.write(b'{%d}'%int(i))
+        time.sleep(0.025)
+    if part == 'head':
+        ser.write(b's')
+    elif part == 'eyes':
+        ser.write(b'e')
 
 
 #----------------------------------------------------------------------
@@ -172,11 +191,12 @@ while(True):
         # print("CAP_PROP_POS_FRAMES = ",current_frame)
         # time_diff = int(clock_diff(current_clock,start_clock))
 
-        for i in str(arduino_head_point):
-            ser.write(b'{%d}'%int(i))
-            time.sleep(0.025)
-        ser.write(b's')
 
+        eyes = eye_angle(center_point)
+
+        send_serial(eyes,'eyes')
+
+        send_serial(arduino_head_point,'head')
 
 
         if boundary_box_1[0] < x < boundary_box_3[2]:
